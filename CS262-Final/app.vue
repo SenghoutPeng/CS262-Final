@@ -1,5 +1,7 @@
 <template>
-  <h1 class="text-3xl font-bold underline">
-    Hello world!
-  </h1>
+  <html data-theme="synthwave">
+    <NuxtLayout>
+      <NuxtPage />
+    </NuxtLayout>
+  </html>
 </template>

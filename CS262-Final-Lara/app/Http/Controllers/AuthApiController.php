@@ -20,10 +20,8 @@ class AuthApiController extends Controller
             'email' => 'required|email|unique:users',
             'password' => 'required|string|min:8|confirmed',
         ]);
-       
-        $user = User::create($validated);
 
-        Auth::login($user);
+        $user = User::create($validated);
 
         return response()->json(['message' => 'Account Created Successfully'],200);
 

@@ -18,7 +18,9 @@ Route::get('/login-form', [AuthController::class,'showLogin']);
 Route::get('/change-password-form', [AuthController::class,'showChangePassword']);
 
 // http://localhost:8000/signup
-Route::post('/signup', [AuthController::class,'signup']);
+Route::post('/signup', [AuthController::class, 'signup'])
+    ->middleware('guest')
+    ->name('signup');
 
 // http://localhost:8000/login
 Route::post('/login', [AuthController::class,'login']);

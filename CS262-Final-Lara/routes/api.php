@@ -8,9 +8,15 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
+// http://localhost:8000/api/test
+Route::post('/test', function () {
+    return response()->json(['msg' => 'API Route Working'], 200);
+});
 
 // http://localhost:8000/api/signup
-Route::post('/signup', [AuthApiController::class,'signup']);
+Route::post('/signup', [AuthApiController::class, 'signup'])
+    ->middleware('guest')
+    ->name('signup');
 
 // http://localhost:8000/api/login
 Route::post('/login', [AuthApiController::class,'login']);
