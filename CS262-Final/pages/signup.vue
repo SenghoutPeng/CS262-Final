@@ -1,11 +1,12 @@
 <template>
     <div>
-        <form @submit.prevent="handleSignUp">
+        <form @submit.prevent="handleSignUp" >
             <h1>SignUp page</h1>
             <input type="text" v-model="FormData.name" placeholder="username"/>
             <input type="text" v-model="FormData.email" placeholder="email"/>
-            <input type="text" v-model="FormData.password" placeholder="password"/>
-            <input type="text" v-model="FormData.password_confirmation" placeholder="password Confirmation"/>
+            <input type="password" v-model="FormData.password" placeholder="password"/>
+            <input type="password" v-model="FormData.password_confirmation" placeholder="password Confirmation"/>
+
             <button type="submit" class="btn btn-primary w-full">Sign Up</button>
         </form>
     </div>
@@ -19,32 +20,44 @@ const client = useSanctumClient()
 
 const config = useRuntimeConfig()
 
+
+useHead({
+    title: 'register'
+})
+
+const errors = ref({})
+
 const FormData = ref({
-    name: '',
     email: '',
-    password: '',
+    name: '',
     password_confirmation: '',
+    password: '',
 })
 
 definePageMeta({
-    layout: 'auth', // this function include the layout into this page
+    layout: 'auth',
     middleware: 'sanctum:guest'
 })
 
 const handleSignUp = async () => {
-    try {
-        await $fetch(`${config.public.baseUrl}/api/signup`, {
+    try{
+
+        await client(`${config.public.baseUrl}/api/signup`, {
             method: 'POST',
-            body: FormData.value
+            body: JSON.stringify(FormData.value)
         })
 
         await login(FormData.value)
-    } catch (error) {
-        console.error('Signup error:', error)
+    }catch(err){
+        errors.value = err.response._data.errors
     }
+
+
+
 }
-    
+
 </script>
+
 
 <style scoped>
 

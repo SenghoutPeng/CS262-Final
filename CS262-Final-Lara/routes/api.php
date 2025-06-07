@@ -14,9 +14,7 @@ Route::post('/test', function () {
 });
 
 // http://localhost:8000/api/signup
-Route::post('/signup', [AuthApiController::class, 'signup'])
-    ->middleware('guest')
-    ->name('signup');
+Route::post('/signup', [AuthApiController::class, 'signup']);
 
 // http://localhost:8000/api/login
 Route::post('/login', [AuthApiController::class,'login']);

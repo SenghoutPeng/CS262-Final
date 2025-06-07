@@ -11,6 +11,8 @@
 
 <script setup>
 
+const {login} = useSanctumAuth()
+
 const FormData = ref({
     email: '',
     password: ''
@@ -21,8 +23,8 @@ definePageMeta({
     middleware: 'sanctum:guest'
 })
 
-const handleLogin = () => {
-
+const handleLogin = async () => {
+    await login(FormData.value)
 }
     
 </script>
