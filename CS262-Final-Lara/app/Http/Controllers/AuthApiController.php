@@ -20,30 +20,34 @@ class AuthApiController extends Controller
             'email' => 'required|email|unique:users',
             'password' => 'required|string|min:8|confirmed',
         ]);
-       
-        $user = User::create($validated);
 
-        Auth::login($user);
+         $user = User::create([
+        'name' => $validated['name'],
+        'email' => $validated['email'],
+        'password' => Hash::make($validated['password']), // Add this line
+    ]);
 
         return response()->json(['message' => 'Account Created Successfully'],200);
 
     }
 
     public function login(Request $request){
-       $validated = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|string'
+        $feilds = $request->validate([
+            'email' => 'required|email|exists:users,email',
+            'password' => 'required|min:8|'
         ]);
-        if (Auth::attempt($validated)) {
-            $request->session()->regenerate();
-            return response()->json(['message' => 'Logged in successfully'],200);
-        }
-        else{
-            return response()->json(['message' => 'Logging in is not successfully done'],422);
-        }
-       
 
+        if (!Auth::attempt($feilds)) {
+            return response()->json(['errors' => [
+                'user' => ['invalid credentials']
+            ]], 401);
+        }
+
+        $request->session()->regenerate();
+
+        return response()->json(['message' => 'Logged in successfully', 'user' => Auth::user()]);
     }
+
     
     public function logout(Request $request)
     {

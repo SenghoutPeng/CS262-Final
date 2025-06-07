@@ -19,6 +19,24 @@ export default defineNuxtConfig({
     '@nuxt/image',
     '@nuxt/scripts',
     '@nuxt/test-utils',
-    '@nuxt/ui'
-  ]
+    '@nuxt/ui',
+    'nuxt-auth-sanctum'
+  ],
+  sanctum:{
+    baseUrl : 'http://localhost:8000',
+    endpoints:{
+      login: '/api/login',
+      logout: '/api/logout'
+    },
+
+    redirect: {
+      onLogin: '/',
+      onLogout: '/login'
+    }
+  },
+  runtimeConfig:{
+    public:{
+      baseUrl : 'http://localhost:8000'
+    }
+  }
 })
