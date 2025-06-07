@@ -21,32 +21,48 @@ class AuthApiController extends Controller
             'password' => 'required|string|min:8|confirmed',
         ]);
 
-         $user = User::create([
-        'name' => $validated['name'],
-        'email' => $validated['email'],
-        'password' => Hash::make($validated['password']), // Add this line
+        $user = User::create($validated);
+        $token = $user->createToken('api-token')->plainTextToken;
+
+        return response()->json([
+            'message' => 'Account created successfully',
+            'token' => $token,
+            'user' => $user,
+        ], 201);
+
+      
+
+    }
+
+public function login(Request $request)
+{
+    $validated = $request->validate([
+        'email' => 'required|email|exists:users,email',
+        'password' => 'required|min:8'
     ]);
-
-        return response()->json(['message' => 'Account Created Successfully'],200);
-
+ 
+ $user = User::where('email',$request->email)->first();
+    if (!$user || !Auth::attempt($validated)) {
+        return response()->json([
+            'errors' => [
+                'credentials' => ['Invalid credentials']
+            ]
+        ], 401);
     }
 
-    public function login(Request $request){
-        $feilds = $request->validate([
-            'email' => 'required|email|exists:users,email',
-            'password' => 'required|min:8|'
-        ]);
 
-        if (!Auth::attempt($feilds)) {
-            return response()->json(['errors' => [
-                'user' => ['invalid credentials']
-            ]], 401);
-        }
 
-        $request->session()->regenerate();
+    // Create new token
+    $token = $user->createToken('mytoken')->plainTextToken;
 
-        return response()->json(['message' => 'Logged in successfully', 'user' => Auth::user()]);
-    }
+    return response()->json([
+        'message' => 'Logged in successfully',
+        'user' => $user,
+        'token' => $token
+    ], 200);
+}
+
+
 
     
     public function logout(Request $request)
@@ -55,41 +71,31 @@ class AuthApiController extends Controller
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-
+        
         return response()->json(['message' => 'Logged out successfully']);
     }
 
     public function changePassword(Request $request)
     {
         $request->validate([
-            'current_password' => 'required|current_password',
+            'current_password' => 'required',
             'password' => 'required|string|min:8|confirmed',
         ]);
-
-        $auth = Auth::user();
-
-        if(!Hash::check($request->current_password, $auth->password))
-        { 
-            
-            return response()->json([
-                'error' => 'Current password is incorrect.'
-            ], 422);
-          
+    
+        $user = $request->user();
+    
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json(['error' => 'Current password is incorrect'], 422);
         }
-        if ($request->current_password === $request->new_password) {
-            return response()->json([
-                'error' => 'New password cannot be the same as the current password.'
-            ], 422);
+    
+        if ($request->current_password === $request->password) {
+            return response()->json(['error' => 'New password cannot be the same as current password'], 422);
         }
-        
-            $user =  User::find($auth->id);
-            $user->password = $request->password;
-            $user->save();
-            return response()->json([
-                'message' => 'Password updated successfully.'
-            ],200);
- 
+    
+        $user->password = Hash::make($request->password);
+        $user->save();
+    
+        return response()->json(['message' => 'Password updated successfully']);
     }
+    
 }
-
-
