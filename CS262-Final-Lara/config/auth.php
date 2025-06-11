@@ -36,9 +36,13 @@ return [
     */
 
     'guards' => [
-        'web' => [
+        'web' => [ // This is for User
             'driver' => 'session',
             'provider' => 'users',
+        ],
+        'admin' => [ // <--- Add this guard for admins
+        'driver' => 'session', // Or 'session' if admin only uses web session, this enables token-based auth
+        'provider' => 'admins', // <--- This will point to your Admin model
         ],
     ],
 
@@ -65,10 +69,10 @@ return [
             'model' => env('AUTH_MODEL', App\Models\User::class),
         ],
 
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
+        'admins' => [ // <--- Add this provider for admins
+        'driver' => 'eloquent',
+        'model' => App\Models\Admin::class, // <--- Your Admin model
+        ],
     ],
 
     /*

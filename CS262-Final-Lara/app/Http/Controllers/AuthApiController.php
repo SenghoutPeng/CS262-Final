@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Organization;
+use App\Models\Admin;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
@@ -28,41 +30,61 @@ class AuthApiController extends Controller
             'message' => 'Account created successfully',
             'token' => $token,
             'user' => $user,
-        ], 201);
-
-      
+        ], 201); 
 
     }
 
-public function login(Request $request)
-{
-    $validated = $request->validate([
-        'email' => 'required|email|exists:users,email',
-        'password' => 'required|min:8'
+    public function signupOrg(Request $request)
+    {
+         $validated = $request->validate([
+        'org_name' => 'required|string|max:255',
+        'email' => 'required|email|unique:organization,email',
+        'password' => 'required|string|min:8|confirmed',
+        'contact_name' => 'nullable|string|max:255',
+        'contact_phone' => 'nullable|string|max:20',
+        'contact_email' => 'nullable|email|max:255',
     ]);
- 
- $user = User::where('email',$request->email)->first();
-    if (!$user || !Auth::attempt($validated)) {
+
+    $organization = Organization::create($validated); // Use $organization for clarity
+    $token = $organization->createToken('org-api-token')->plainTextToken;
+
         return response()->json([
-            'errors' => [
-                'credentials' => ['Invalid credentials']
-            ]
-        ], 401);
+        'message' => 'Organization account created successfully',
+        'token' => $token,
+        'user' => [
+            'id' => $organization->org_id,
+            'org_name' => $organization->org_name,
+            'email' => $organization->email,
+        ],
+    ], 201);
     }
+    
+    public function login(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => 'required|email|exists:users,email',
+            'password' => 'required|min:8'
+        ]);
+    
+        $user = User::where('email',$request->email)->first(); //find user by email
 
+        if (!$user || !Auth::attempt($validated)) { // if user is not found
+            return response()->json([
+                'errors' => [
+                    'credentials' => ['Invalid credentials']
+                ]
+            ], 401);
+        }
 
+        // Create new API token
+        $token = $user->createToken('mytoken')->plainTextToken;
 
-    // Create new token
-    $token = $user->createToken('mytoken')->plainTextToken;
-
-    return response()->json([
-        'message' => 'Logged in successfully',
-        'user' => $user,
-        'token' => $token
-    ], 200);
-}
-
-
+        return response()->json([
+            'message' => 'Logged in successfully',
+            'user' => $user,
+            'token' => $token
+        ], 200);
+    }
 
     
     public function logout(Request $request)
@@ -98,4 +120,27 @@ public function login(Request $request)
         return response()->json(['message' => 'Password updated successfully']);
     }
     
+
+    public function getAllUser()
+    {
+        $count = User::count();
+        return response()->json(['totalUsers' => $count]);
+    }
+
+    public function getBalanceUser()
+    {
+        $totalBalance = User::sum('balance'); // assuming the 'balance' column exists in users table
+
+        return response()->json(['TotalBalance' => $totalBalance]);
+    }
+
+    public function getUser(){
+        $all = User::select('id', 'name', 'email', 'balance', 'status', 'created_at')->get();
+
+        return response()-> json([
+            'success' => true,
+            'data' => $all
+        ]);
+    }
+
 }

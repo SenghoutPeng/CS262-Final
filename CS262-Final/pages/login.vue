@@ -11,22 +11,22 @@
 
 <script setup>
 
-const {login} = useSanctumAuth()
+    const {login} = useSanctumAuth()
 
-const FormData = ref({
-    email: '',
-    password: ''
-})
+    const FormData = ref({
+        email: '',
+        password: ''
+    })
 
-definePageMeta({
-    layout: 'auth', // this function include the layout into this page
-    middleware: 'sanctum:guest'
-})
+    definePageMeta({
+        layout: 'auth', // this function include the layout into this page
+        middleware: 'sanctum:guest'
+    })
 
-const handleLogin = async () => {
-    await login(FormData.value)
-}
-    
+    const handleLogin = async () => {   //async tell js that function will do sth take time
+        await login(FormData.value)     // await is wait for data from the server
+    }
+        
 </script>
 
 <style scoped>

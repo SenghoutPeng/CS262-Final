@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\AuthApiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -16,6 +17,9 @@ Route::post('/test', function () {
 // http://localhost:8000/api/signup
 Route::post('/signup', [AuthApiController::class, 'signup']);
 
+// http://localhost:8000/api/signup-org
+Route::post('/signup-org', [AuthApiController::class, 'signupOrg']);
+
 // http://localhost:8000/api/login
 Route::post('/login', [AuthApiController::class,'login']);
 
@@ -24,3 +28,21 @@ Route::post('/logout', [AuthApiController::class,'logout']);
 
 // http://localhost:8000/api/change-password
 Route::post('/change-password', [AuthApiController::class,'changePassword']);
+
+// http://localhost:8000/api/admin/login
+Route::post('/adminLog', [AdminAuthController::class, 'loginAdmin']);
+
+// user dashbaord api
+Route::controller(AuthApiController::class)->group(function () {
+    Route::get('/getAllUser', 'getAllUser');
+    Route::get('/Balanceuser', 'getBalanceUser');
+    Route::get('/getUser', 'getUser');
+});
+
+Route::get('/token', function (Request $request) {
+    $token = $request->session()->token();
+ 
+    $token = csrf_token();
+ 
+    return $token;
+});

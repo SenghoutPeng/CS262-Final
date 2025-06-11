@@ -16,9 +16,9 @@
 
 const {login} = useSanctumAuth()
 
-const client = useSanctumClient()
+const client = useSanctumClient()   //send request to laravel backend
 
-const config = useRuntimeConfig()
+const config = useRuntimeConfig()   // base URL
 
 
 useHead({
@@ -42,7 +42,7 @@ definePageMeta({
 const handleSignUp = async () => {
     try{
 
-        await client(`${config.public.baseUrl}/api/signup`, {
+        await client(`${config.public.baseUrl}/api/signup`, {      //client is like fetch work with sanctum and authentication
             method: 'POST',
             body: JSON.stringify(FormData.value)
         })

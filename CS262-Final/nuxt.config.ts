@@ -26,7 +26,7 @@ export default defineNuxtConfig({
     baseUrl : 'http://localhost:8000',
     endpoints:{
       login: '/api/login',
-      logout: '/api/logout'
+      logout: '/api/logout',
     },
 
     redirect: {

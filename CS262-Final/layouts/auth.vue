@@ -8,6 +8,7 @@
             <ul class="menu menu-horizontal px-1">
                 <li><NuxtLink to="/login">login</NuxtLink></li>
                 <li><NuxtLink to="/SignUp">SignUp</NuxtLink></li>
+                <li><NuxtLink to="/SignupOrg">Org</NuxtLink></li>
             </ul>
         </div>
 
