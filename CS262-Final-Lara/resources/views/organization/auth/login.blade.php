@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Signup</title>
+    <title>Login</title>
 
 
 </head>
@@ -18,12 +18,10 @@
            @endif
            </div>
 <div class="form-container">
-    <form action="/signup" method="POST">
+
+    <form action="/organization/login" method="POST">
         @csrf
-        <div class="form-group">
-            <label for="username">Username</label>
-            <input type="text" id="username" name="username" required>
-        </div>
+       
         <div class="form-group">
             <label for="email">Email</label>
             <input type="email" id="email" name="email" required>
@@ -32,13 +30,9 @@
             <label for="password">Password</label>
             <input type="password" id="password" name="password" required>
         </div>
-        <div class="form-group">
-            <label for="password_confirmation">Confirm Password</label>
-            <input type="password" id="password_confirmation" name="password_confirmation" placeholder="Comfirm Password" required>
-        </div>
 
         <div class="form-group">
-            <button type="submit">Create Account</button>
+            <button type="submit">Log in</button>
         </div>
     </form>
 </div>

@@ -19,27 +19,28 @@
 
            <div>
   <!-- Login status -->
-    @if(auth()->check())
-        <p>You are logged in as {{ auth()->user()->username }}</p>
+    @if(auth('admin')->check() )
+        <p>You are logged in as {{ auth('admin')->user()->username}}</p>
     @else
         <p>You are not logged in.</p>
     @endif
 </div>
     <div>
-        <a href="/login-form">Login</a>
+        <a href="/admin/login-form">Login</a>
         <br>
-        <a href="/signup-form">Signup</a>
+        <a href="/admin/signup-form">Signup</a>
         <br>
-        @if(auth()->check())
-       <?php echo '<a href="/change-password-form">Change Password</a>'?>
+        @if(auth('admin')->check())
+    <?php echo '<a href="/admin/change-password-form">Change Password</a>'?>
         @else
         @endif
     </div>
-    <form action="/logout" method="POST">
+<form action="/admin/logout" method="POST">
         @csrf
             <button type="submit">Log out</button>
     </form>
-   
+
+
 </div>
 
 </body>

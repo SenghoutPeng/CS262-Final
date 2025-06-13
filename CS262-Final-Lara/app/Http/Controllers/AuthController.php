@@ -29,11 +29,11 @@ class AuthController extends Controller
 
 
        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users',
+            'username' => 'required|string|max:255',
+            'email' => 'required|email|unique:user',
             'password' => 'required|string|min:8|confirmed',
         ]);
-       
+
         $user = User::create($validated);
 
         Auth::login($user);
@@ -41,7 +41,7 @@ class AuthController extends Controller
         return redirect('/');
 
     }
-    
+
 
     public function login(Request $request){
        $validated = $request->validate([
@@ -72,23 +72,20 @@ class AuthController extends Controller
     public function changePassword(Request $request)
     {
         $request->validate([
-            'current_password' => 'required|current_password',
+            'current_password' => 'required',
             'password' => 'required|string|min:8|confirmed',
         ]);
 
-        $auth = Auth::user();
 
-        if(!Hash::check($request->current_password, $auth->password))
-        { 
-            return back()->with(['current_password'=>'Cureent password is incorrect']);
+        if ($request->current_password === $request->password) {
+            return back()->withErrors(['password' => 'New password cannot be the same as your current password.']);
         }
-        if ($request->current_password === $request->new_password) {
-            return back()->with("error", "New password cannot be the same as your curent password.");
-        }
-        
-        $user =  User::find($auth->id);
-            $user->password = $request->password;
-            $user->save();
-            return back()->with('status', 'Password updated successfully.');
+
+        $user = $request->user();
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        return back()->with('status', 'Password updated successfully.');
     }
+
 }

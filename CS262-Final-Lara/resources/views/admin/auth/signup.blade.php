@@ -11,14 +11,14 @@
 <div>
            @if(session('status'))
            <div class="alert alert-success">
-            
+
             {{ session('status') }}
-            
+
            </div>
            @endif
            </div>
 <div class="form-container">
-    <form action="/signup" method="POST">
+    <form action="/admin/signup" method="POST">
         @csrf
         <div class="form-group">
             <label for="username">Username</label>
