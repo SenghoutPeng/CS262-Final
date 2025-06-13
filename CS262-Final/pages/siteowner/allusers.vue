@@ -1,4 +1,4 @@
-<template>
+<template >
   <div class="min-h-screen bg-white p-8 font-inter antialiased">
     <div class="max-w-full mx-auto px-4"> <!-- Changed max-w-7xl to max-w-full and adjusted padding -->
       <!-- Header Section -->
@@ -7,8 +7,8 @@
           <h1 class="text-4xl font-bold text-gray-900">User Management</h1>
           <p class="text-gray-600 mt-1">Manage all registered users and their account details</p>
         </div>
-        <button
-          class="flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-300 ease-in-out"
+        <button @click="showAddUserCard = true"
+          class="btn flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-300 ease-in-out"
         >
           <!-- User Plus Icon SVG -->
           <svg
@@ -27,6 +27,63 @@
           </svg>
           Add User
         </button>
+        
+        <!--Show card when click add user-->
+        <!-- Modal Overlay -->
+        <div v-if="showAddUserCard" class="fixed inset-0 bg-opacity-40 bg-base-200 flex items-center justify-center z-50">
+          <!-- Card -->
+          <div class="card w-full max-w-md bg-white shadow-2xl rounded-2xl border border-gray-200 overflow-hidden relative">
+            <div class="card-body p-6 sm:p-8">
+              <h2 class="card-title text-3xl font-bold text-gray-800 mb-6 text-center">Add New User</h2>
+
+              <!-- Close Button -->
+              <button @click="showAddUserCard = false" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
+
+              <!-- Form -->
+              <form class="space-y-5" @submit.prevent="">
+                <!-- Username -->
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text text-gray-700 font-medium">Username</span>
+                  </label>
+                  <input type="text" placeholder="Enter username" class="input bg-base-content input-bordered w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" required/>
+                </div>
+
+                <!-- Email -->
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text text-gray-700 font-medium">Email</span>
+                  </label>
+                  <input type="email" placeholder="Enter email" class="input bg-base-content input-bordered w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" required/>
+                </div>
+
+                <!--Password-->
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text text-gray-700 font-medium">Password</span>
+                  </label>
+                  <input type="password" placeholder="Enter Password" class="input bg-base-content input-bordered w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" required/>
+                </div>
+
+                <!--Confirm Password-->
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text text-gray-700 font-medium">Confirmation</span>
+                  </label>
+                  <input type="password" placeholder="Enter Comfirmation" class="input bg-base-content input-bordered w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" required/>
+                </div>
+
+                <!-- Submit -->
+                <div class="form-control mt-6">
+                  <button type="submit" class="btn btn-primary w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition duration-300">
+                    Create User
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       <!-- Stats Cards Section -->
@@ -36,7 +93,7 @@
           <div class="bg-blue-100 text-blue-600 p-3 rounded-full flex-shrink-0 flex items-center justify-center">
             <!-- Icon for Total Users -->
             <svg
-              xmlns="http://www.w3.org/2000/svg"
+              xmlns=""
               class="h-6 w-6"
               fill="none"
               viewBox="0 0 24 24"
@@ -163,25 +220,17 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
-            <input type="text" class="grow" placeholder="Search users..." />
+            <input v-model="searchQuery" type="text" class="grow" placeholder="Search users..." />
           </label>
 
           <!-- Filter and Sort Buttons -->
           <div class="flex gap-2">
-            <button class="btn btn-outline btn-sm">
-              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-              </svg>
-              Filter
-            </button>
-            <button class="btn btn-outline btn-sm">
-              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-              </svg>
-              Sort
-            </button>
+            <select v-model="statusFilter" class="btn btn-outline btn-sm">
+                <option value="all">All Status</option>
+                <option value="active">All Active</option>
+                <option value="inactive">All InActive</option>
+              </select>
+              
           </div>
         </div>
       </div>
@@ -191,7 +240,7 @@
         <table class="table bg-white w-full">
           <thead>
             <tr class="text-base-200 border-b border-gray-200">
-              <th>User</th>
+              <th>Name</th>
               <th>Email</th>
               <th>Balance</th>
               <th>Status</th>
@@ -201,7 +250,7 @@
           </thead>
           <tbody>
             <!-- User Row -->
-            <tr v-for="user in allUsers" :key="user.id" class=" border-b border-gray-200">
+            <tr v-for="user in filteredUsers" :key="user.id" class=" border-b border-gray-200">
               <td>
                 <div class="flex items-center gap-3">
                   <div class="avatar placeholder">
@@ -225,18 +274,13 @@
               <td>{{ new Date(user.created_at).toLocaleDateString() }}</td>
               <td>
                 <div class="flex gap-2">
-                  <button class="btn btn-ghost btn-xs text-gray-500 hover:text-gray-700">
+                  <button class="btn btn-info btn-xs text-gray-500 hover:text-base-cotent">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
                   </button>
-                  <button class="btn btn-ghost btn-xs text-gray-500 hover:text-gray-700">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                    </svg>
-                  </button>
+                  
                 </div>
               </td>
             </tr>
@@ -246,10 +290,35 @@
         </table>
       </div>
     </div>
+
+    <!--pagination-->
+      <div class="flex justify-end mt-4">
+    <div class="flex gap-2">
+      <input
+        class="btn btn-square"
+        type="radio"
+        name="options"
+        aria-label="1"
+        checked="checked" />
+      <input
+        class="btn btn-square"
+        type="radio"
+        name="options"
+        aria-label="2" />
+      <input
+        class="btn btn-square"
+        type="radio"
+        name="options"
+        aria-label="3" />
+      <input
+        class="btn btn-square"
+        type="radio"
+        name="options"
+        aria-label="4" />
+    </div>
+      </div>
   </div>
-
-
-
+  
     </div>
   </div>
 </template>
@@ -260,7 +329,7 @@
         layout: 'master1',
     })
 
- const { data: userCountData, error: userError } = await useFetch('http://localhost:8000/api/Alluser', {
+ const { data: userCountData, error: userError } = await useFetch('http://localhost:8000/api/getAllUser', {
   key: 'all-users',
 }) // call api to get user data, key: 'all-users' enables Nuxt to cache or share the request (especially useful in SSR or reactivity)
 
@@ -275,6 +344,46 @@ const { data: userListData, error: userListError } = await useFetch('http://loca
 const allUsers = computed(() => userListData.value?.data || [])
 const totalUsers = computed(() => userCountData.value?.totalUsers || 0) //Extracts the actual list of users from the data property, Defaults to an empty array if not available
 const totalBalance = computed(() => balanceData.value?.totalBalance || 0)
+
+//show the card add user
+const showAddUserCard = ref('false')
+
+// search
+const searchQuery = ref('')
+
+/* const filteredUsers = computed(() => {
+  const query = searchQuery.value.toLowerCase().trim() //get the value from the input using ref
+  if (!query) return allUsers.value // if empty return all list of user
+  return allUsers.value.filter(user =>       //other wise filter the name email and id
+    user.name.toLowerCase().includes(query) ||
+    user.email.toLowerCase().includes(query) ||
+    String(user.id).includes(query)
+  )
+}) */
+
+onMounted(() => { // onMounted is when every component in the website is ready, then it can run
+  showAddUserCard.value = false; // Ensure modal is closed after hydration
+});
+
+const statusFilter = ref('all')
+
+
+const filteredUsers = computed(() => {
+  const query = searchQuery.value.toLowerCase().trim()
+
+  // Step 1: Filter by search query
+  let filtered = allUsers.value.filter(user =>
+    user.name.toLowerCase().includes(query) ||
+    user.email.toLowerCase().includes(query) ||
+    String(user.id).includes(query)
+  )
+
+  // Step 2: Filter by status
+  if (statusFilter.value !== 'all') {
+    filtered = filtered.filter(user => user.status === statusFilter.value) //call back funtion
+  }
+      return filtered
+    })
 
 </script>
 
