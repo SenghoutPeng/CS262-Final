@@ -34,8 +34,7 @@ return [
     | Supported: "session"
     |
     */
-
-    'guards' => [
+'guards' => [
     'web' => [
         'driver' => 'session',
         'provider' => 'users',
@@ -46,8 +45,19 @@ return [
         'provider' => 'organizations',
     ],
 
+    'organization-api' => [
+        'driver' => 'sanctum',
+        'provider' => 'organizations',
+
+    ],
+
     'admin' => [
         'driver' => 'session',
+        'provider' => 'admins',
+    ],
+
+    'admin-api' => [
+        'driver' => 'sanctum',
         'provider' => 'admins',
     ],
 ],
@@ -79,12 +89,12 @@ return [
 
         'organizations' => [
             'driver' => 'eloquent',
-            'model' =>env('AUTH_MODEL', App\Models\Organization::class),
+            'model' => App\Models\Organization::class,
         ],
 
         'admins' => [
             'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', App\Models\Admin::class),
+            'model' =>  App\Models\Admin::class,
         ],
         // 'users' => [
         //     'driver' => 'database',

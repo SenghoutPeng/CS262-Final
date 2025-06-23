@@ -23,7 +23,7 @@ definePageMeta({
 
 const handleLogin = async () => {
   try {
-    const response = await $fetch('http://localhost:8000/api/adminLog', {
+    const response = await $fetch('http://localhost:8000/api/admin/login', {
       method: 'POST',
       body: FormData.value
     })

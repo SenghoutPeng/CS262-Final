@@ -8,7 +8,7 @@ use App\Models\Organization;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 
-class Org_AuthController extends Controller
+class WebOrganizationAuthController extends Controller
 {
 
     public function showSignUp()
@@ -86,7 +86,7 @@ class Org_AuthController extends Controller
             return response()->json(['message' => 'Password has failed to updated.']);
         }
 
-        $organization = $request->guard('organization')->user();
+        $organization = Auth::guard('organization')->user();
         $organization->password = Hash::make($request->password);
         $organization->save();
 

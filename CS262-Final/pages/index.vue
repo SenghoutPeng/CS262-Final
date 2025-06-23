@@ -10,8 +10,7 @@
         middleware: 'sanctum:auth'
     })
     
-    const {
-        isAuthenticated} = useSanctumAuth();
+    const { isAuthenticated } = useSanctumAuth();
 </script>
 
 <style scoped>

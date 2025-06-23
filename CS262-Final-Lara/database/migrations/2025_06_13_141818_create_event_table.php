@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('title', 255);
             $table->text('description');
             $table->date('proposed_date');
+            $table->time('event_time');
             $table->string('location', 255);
             $table->decimal('ticket_price', 10, 2);
             $table->integer('total_ticket');

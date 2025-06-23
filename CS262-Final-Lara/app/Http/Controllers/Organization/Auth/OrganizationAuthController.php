@@ -5,12 +5,13 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 use App\Models\Organization;
-
+use App\Models\Event;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 
 
-class Org_AuthApiController extends Controller
+class OrganizationAuthController extends Controller
 {
     //<?php
 
@@ -29,6 +30,13 @@ class Org_AuthApiController extends Controller
 
         $organization = Organization::create($validated);
         $token = $organization->createToken('api-token')->plainTextToken;
+
+        activity()
+            ->causedBy($organization)
+            ->withProperties([
+                'email' => $organization->email,
+            ])
+            ->log('organization signed up');
 
         return response()->json([
             'message' => 'Account created successfully',
@@ -59,6 +67,13 @@ public function login(Request $request)
     // Create new token
     $token = $organization->createToken('mytoken')->plainTextToken;
 
+    activity()
+    ->causedBy($organization)
+    ->withProperties([
+        'email' => $organization->email,
+    ])
+    ->log('organization logged in');
+
     return response()->json([
         'message' => 'Logged in successfully',
         'organization' => $organization,
@@ -69,45 +84,66 @@ public function login(Request $request)
 
 
 
-    public function logout(Request $request)
-    {
-        Auth::guard('organization')->logout();
+public function logout(Request $request)
+{
 
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+    $organization = $request->user();
+
+    if (!$organization) {
+        return response()->json(['message' => 'Not authenticated'], 401);
+    }
+
+
+    $token = $organization->currentAccessToken();
+
+    if ($token) {
+        $token->delete();
+
+        activity()
+        ->causedBy($organization)
+        ->withProperties([
+            'email' => $organization->email,
+        ])
+        ->log('organization logged out');
 
         return response()->json(['message' => 'Logged out successfully']);
     }
 
+    return response()->json(['message' => 'No active token found'], 400);
+}
+
     public function changePassword(Request $request)
     {
         $request->validate([
-            'current_password' => 'required|current_password',
+            'current_password' => 'required|string',
             'password' => 'required|string|min:8|confirmed',
         ]);
 
-        if ($request->current_password === $request->password) {
-            return response()->json(['message' => 'Password has failed to updated.']);
+        $organization = Auth::guard('organization-api')->user();
+
+        if (!Hash::check($request->current_password, $organization->password)) {
+            return response()->json([
+                'message' => 'The current password is incorrect.',
+                'errors' => ['current_password' => ['The current password is incorrect.']]
+            ], 422);
         }
 
-        $organization = $request->guard('organization')->user();
+        if ($request->current_password === $request->password) {
+            return response()->json(['message' => 'The new password cannot be the same as the current password.'], 422);
+        }
+
+
         $organization->password = Hash::make($request->password);
         $organization->save();
 
+        activity()
+        ->causedBy($organization)
+        ->withProperties([
+            'email' => $organization->email,
+        ])
+        ->log('organization changed password');
         return response()->json(['message' => 'Password updated successfully.']);
     }
-
-    public function createEvent(Request $request)
-    {
-        $request->validate([
-            'title' => 'required|string',
-            'description' => 'required|string',
-            'location' => 'required|string',
-            'ticket_price' => 'required',
-            'banner' => 'required'
-        ]);
-    }
-
 
 
 }

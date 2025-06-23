@@ -7,13 +7,22 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 class Organization extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, Notifiable, LogsActivity;
     protected $table = 'organization';
     protected $primaryKey = 'org_id';
-    protected $guards = 'organization';
+    protected $guard = 'organization';
 
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+        ->logOnly(['org_name', 'org_id']) // fields to track
+        ->useLogName('organization')            // label for the log
+        ->logOnlyDirty();
+    }
     protected $fillable = [
         'org_name',
             'email' ,

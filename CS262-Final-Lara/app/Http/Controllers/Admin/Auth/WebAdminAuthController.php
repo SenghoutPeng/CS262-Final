@@ -8,7 +8,7 @@ use App\Models\Admin;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 
-class Admin_AuthController extends Controller
+class WebAdminAuthController extends Controller
 {
 
     public function showSignUp()
@@ -81,10 +81,12 @@ class Admin_AuthController extends Controller
     if ($request->current_password === $request->password) {
         return back()->withErrors(['message' => 'New password cannot be the same as your current password.']);
     }
+    $admin = Auth::guard('admin')->user();
 
-    $admin =Auth::guard('admin')->user();
-    $admin->password = Hash::make($request->password);
-    $admin->save();
+
+    $admin->update([
+        'password' => Hash::make($request->password),
+    ]);
 
     return back()->with('status', 'Password updated successfully.');
 }

@@ -7,7 +7,7 @@ use App\Models\User;
 
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Facades\DB;
 
 class AuthApiController extends Controller
 {
@@ -24,6 +24,13 @@ class AuthApiController extends Controller
 
         $user = User::create($validated);
         $token = $user->createToken('api-token')->plainTextToken;
+
+        activity()
+        ->causedBy($user)
+        ->withProperties([
+            'email' => $user->email,
+        ])
+        ->log('user signed up');
 
         return response()->json([
             'message' => 'Account created successfully',
@@ -49,8 +56,15 @@ public function login(Request $request)
         ], 401);
     }
 
-    // Create new token
+
     $token = $user->createToken('mytoken')->plainTextToken;
+
+    activity()
+    ->causedBy($user)
+    ->withProperties([
+        'email' => $user->email,
+    ])
+    ->log('user logged in');
 
     return response()->json([
         'message' => 'Logged in successfully',
@@ -61,16 +75,33 @@ public function login(Request $request)
 
 
 
+public function logout(Request $request)
+{
 
-    public function logout(Request $request)
-    {
-        Auth::logout();
+    $user = $request->user();
 
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+    if (!$user) {
+        return response()->json(['message' => 'Not authenticated'], 401);
+    }
 
+
+    $token = $user->currentAccessToken();
+
+    if ($token) {
+        $token->delete();
         return response()->json(['message' => 'Logged out successfully']);
     }
+
+    activity()
+    ->causedBy($organization)
+    ->withProperties([
+        'email' => $organization->email,
+    ])
+    ->log('organization logged out');
+
+    return response()->json(['message' => 'No active token found'], 400);
+}
+
 
     public function changePassword(Request $request)
     {
@@ -94,8 +125,16 @@ public function login(Request $request)
             'password' => Hash::make($request->password),
         ]);
 
+        activity()
+        ->causedBy($user)
+        ->withProperties([
+            'email' => $user->email,
+        ])
+        ->log('user changed password');
+
         return response()->json(['message' => 'Password updated successfully'], 200);
     }
 
+   
 }
 

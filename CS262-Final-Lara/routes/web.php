@@ -1,8 +1,8 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\Organization\Auth\Org_AuthController;
-use App\Http\Controllers\Admin\Auth\Admin_AuthController;
+use App\Http\Controllers\Organization\Auth\WebOrganizationAuthController;
+use App\Http\Controllers\Admin\Auth\WebAdminAuthController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -45,50 +45,50 @@ Route::post('/change-password', [AuthController::class,'changePassword']);
 //Authenthication start//
 
 // http://localhost:8000/signup-form
-Route::get('/organization/signup-form', [Org_AuthController::class,'showSignUp']);
+Route::get('/organization/signup-form', [WebOrganizationAuthController::class,'showSignUp']);
 
 // http://localhost:8000/login-form
-Route::get('/organization/login-form', [Org_AuthController::class,'showLogin']);
+Route::get('/organization/login-form', [WebOrganizationAuthController::class,'showLogin']);
 
-Route::get('/organization/change-password-form', [Org_AuthController::class,'showChangePassword']);
+Route::get('/organization/change-password-form', [WebOrganizationAuthController::class,'showChangePassword']);
 
 // http://localhost:8000/signup
-Route::post('/organization/signup', [Org_AuthController::class, 'signup']);
+Route::post('/organization/signup', [WebOrganizationAuthController::class, 'signup']);
 
 
 // http://localhost:8000/login
-Route::post('/organization/login', [Org_AuthController::class,'login']);
+Route::post('/organization/login', [WebOrganizationAuthController::class,'login']);
 
 // http://localhost:8000/logout
-Route::post('/organization/logout', [Org_AuthController::class,'logout']);
+Route::post('/organization/logout', [WebOrganizationAuthController::class,'logout']);
 
 // http://localhost:8000/change-password
-Route::post('/organization/change-password', [Org_AuthController::class,'changePassword']);
+Route::post('/organization/change-password', [WebOrganizationAuthController::class,'changePassword']);
 
 
 //Authenthication end//
 //Authenthication start//
 
 // http://localhost:8000/signup-form
-Route::get('/admin/signup-form', [Admin_AuthController::class,'showSignUp']);
+Route::get('/admin/signup-form', [WebAdminAuthController::class,'showSignUp']);
 
 // http://localhost:8000/login-form
-Route::get('/admin/login-form', [Admin_AuthController::class,'showLogin']);
+Route::get('/admin/login-form', [WebAdminAuthController::class,'showLogin']);
 
-Route::get('/admin/change-password-form', [Admin_AuthController::class,'showChangePassword']);
+Route::get('/admin/change-password-form', [WebAdminAuthController::class,'showChangePassword']);
 
 // http://localhost:8000/signup
-Route::post('/admin/signup', [Admin_AuthController::class, 'signup']);
+Route::post('/admin/signup', [WebAdminAuthController::class, 'signup']);
 
 
 // http://localhost:8000/login
-Route::post('/admin/login', [Admin_AuthController::class,'login']);
+Route::post('/admin/login', [WebAdminAuthController::class,'login']);
 
 // http://localhost:8000/logout
-Route::post('/admin/logout', [Admin_AuthController::class,'logout']);
+Route::post('/admin/logout', [WebAdminAuthController::class,'logout']);
 
 // http://localhost:8000/change-password
-Route::post('/admin/change-password', [Admin_AuthController::class,'changePassword']);
+Route::post('/admin/change-password', [WebAdminAuthController::class,'changePassword']);
 
 
 //Authenthication end//

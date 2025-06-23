@@ -2,7 +2,7 @@
     <div>
         <form @submit.prevent="handleSignUp" >
             <h1>SignUp page</h1>
-            <input type="text" v-model="FormData.name" placeholder="username"/>
+            <input type="text" v-model="FormData.username" placeholder="username"/>
             <input type="text" v-model="FormData.email" placeholder="email"/>
             <input type="password" v-model="FormData.password" placeholder="password"/>
             <input type="password" v-model="FormData.password_confirmation" placeholder="password Confirmation"/>
@@ -29,7 +29,7 @@ const errors = ref({})
 
 const FormData = ref({
     email: '',
-    name: '',
+    username: '',
     password_confirmation: '',
     password: '',
 })
@@ -42,10 +42,16 @@ definePageMeta({
 const handleSignUp = async () => {
     try{
 
-        await client(`${config.public.baseUrl}/api/signup`, {      //client is like fetch work with sanctum and authentication
-            method: 'POST',
-            body: JSON.stringify(FormData.value)
-        })
+        await $fetch(`${config.public.baseUrl}/sanctum/csrf-cookie`, {
+    credentials: 'include'
+})
+
+await client(`${config.public.baseUrl}/api/signup`, {
+    method: 'POST',
+    body: FormData.value,
+    credentials: 'include' // Important
+})
+
 
         await login(FormData.value)
     }catch(err){

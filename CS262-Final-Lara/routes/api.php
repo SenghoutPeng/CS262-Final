@@ -1,57 +1,71 @@
 <?php
 
-use App\Http\Controllers\AuthApiController;
-use App\Http\Controllers\Organization\Auth\Org_AuthApiController;
-use App\Http\Controllers\Admin\Auth\Admin_AuthApiController;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\TicketController;
+use App\Http\Controllers\AuthApiController;
+use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\Auth\AdminAuthController;
+use App\Http\Controllers\Organization\OrganizationController;
+use App\Http\Controllers\Organization\Auth\OrganizationAuthController;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+use function PHPSTORM_META\map;
 
-// http://localhost:8000/api/test
-Route::post('/test', function () {
-    return response()->json(['msg' => 'API Route Working'], 200);
+Route::put('/users/{id}', function (Request $request, $id) {
+    $post = User::findOrFail($id);
+    $post->update($request->only('username','email'));
+
+    return response()->json(['message' => 'User updated successfully']);
 });
 
-// http://localhost:8000/api/signup
-Route::post('/signup', [AuthApiController::class, 'signup']);
+// User routes
+Route::prefix('/')->group(function () {
+    Route::post('/signup', [AuthApiController::class, 'signup']);
+    Route::post('/login', [AuthApiController::class, 'login']);
 
-// http://localhost:8000/api/login
-Route::post('/login', [AuthApiController::class,'login']);
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/buy-ticket', [UserController::class, 'buyTicket']);
+        Route::post('/change-password', [AuthApiController::class, 'changePassword']);
+        Route::post('/logout', [AuthApiController::class, 'logout']);
+        Route::get('/profile', [UserController::class, 'userProfile']);
 
-// http://localhost:8000/api/logout
-Route::post('/logout', [AuthApiController::class,'logout']);
-
-// http://localhost:8000/api/change-password
-Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/change-password', [AuthApiController::class, 'changePassword']);
+    });
 });
 
-// http://localhost:8000/api/signup
-Route::post('/organization/signup', [Org_AuthApiController::class, 'signup']);
+// Organization routes
+Route::prefix('organization')->group(function () {
+    Route::post('/signup', [OrganizationAuthController::class, 'signup']);
+    Route::post('/login', [OrganizationAuthController::class, 'login']);
 
-// http://localhost:8000/api/login
-Route::post('/organization/login', [Org_AuthApiController::class,'login']);
+    Route::middleware('auth:organization-api')->group(function () {
+        Route::post('/check-in', [OrganizationController::class, 'checkIn']);
+        Route::post('/event-request', [OrganizationController::class, 'createEvent']);
+        Route::post('/logout', [OrganizationAuthController::class, 'logout']);
+        Route::post('/change-password', [OrganizationAuthController::class, 'changePassword']);
+        Route::get('/profile', [OrganizationController::class, 'profile']);
+    });
+});
 
-// http://localhost:8000/api/logout
-Route::post('/organization/logout', [Org_AuthApiController::class,'logout']);
+// Admin routes
+Route::prefix('admin')->group(function () {
+    Route::post('/signup', [AdminAuthController::class, 'signup']);
+    Route::post('/login', [AdminAuthController::class, 'login']);
 
-// http://localhost:8000/api/change-password
-Route::post('/organization/change-password', [Org_AuthApiController::class,'changePassword']);
+    Route::middleware('auth:admin-api')->group(function () {
+
+        Route::post('/decision', [AdminController::class, 'decisionOnEventRequest']);
+        Route::post('/logout', [AdminAuthController::class, 'logout']);
+        Route::post('/detail-event-request/{event_id}', [AdminController::class, 'allOrganization']);
+        Route::post('/change-password', [AdminAuthController::class, 'changePassword']);
+        Route::get('/profile', [AdminController::class, 'adminProfile']);
+        Route::get('/users', [AdminController::class, 'allUser']);
+        Route::get('/organizations', [AdminController::class, 'allOrganization']);
+        Route::get('/event-requests', [AdminController::class, 'allOrganization']);
 
 
-
-
-// http://localhost:8000/api/signup
-Route::post('/admin/signup', [Admin_AuthApiController::class, 'signup']);
-
-// http://localhost:8000/api/login
-Route::post('/admin/login', [Admin_AuthApiController::class,'login']);
-
-// http://localhost:8000/api/logout
-Route::post('/admin/logout', [Admin_AuthApiController::class,'logout']);
-
-// http://localhost:8000/api/change-password
-Route::post('/admin/change-password', [Admin_AuthApiController::class,'changePassword']);
+        Route::get('/activity-log', [AdminController::class, 'showActivity']);
+        Route::get('/dashboard', [AdminController::class, 'dashboard']);
+    });
+});

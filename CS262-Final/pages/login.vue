@@ -1,33 +1,31 @@
 <template>
-    <div>
-        <form @submit.prevent="handleLogin">
-            <h1>Login page</h1>
-            <input type="text" v-model="FormData.email" placeholder="email"/>
-            <input type="text" v-model="FormData.password" placeholder="password"/>
-            <button type="submit" class="btn btn-primary w-full">Login</button>
-        </form>
-    </div>
-</template>
-
-<script setup>
-
-    const {login} = useSanctumAuth()
-
-    const FormData = ref({
-        email: '',
-        password: ''
+    <form @submit.prevent="handleLogin">
+      <h1>Login</h1>
+      <input v-model="FormData.email" placeholder="Email" />
+      <input v-model="FormData.password" placeholder="Password" type="password" />
+      <button>Login</button>
+    </form>
+  </template>
+  
+  <script setup>
+  const { login } = useSanctumAuth()
+  const config = useRuntimeConfig()
+  const FormData = ref({ email: '', password: '' })
+  
+  definePageMeta({
+    layout: 'auth',
+    middleware: 'sanctum:guest' // only allow guests to see this page
+  })
+  
+  const handleLogin = async () => {
+    await $fetch(`${config.public.baseUrl}/sanctum/csrf-cookie`, {
+      credentials: 'include'
     })
-
-    definePageMeta({
-        layout: 'auth', // this function include the layout into this page
-        middleware: 'sanctum:guest'
-    })
-
-    const handleLogin = async () => {   //async tell js that function will do sth take time
-        await login(FormData.value)     // await is wait for data from the server
-    }
-        
-</script>
+  
+    await login(FormData.value)
+  }
+  </script>
+  
 
 <style scoped>
 

@@ -6,19 +6,16 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
+    public function up()
     {
-        Schema::create('users', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->rememberToken();
-            $table->timestamps();
+        Schema::create('user', function (Blueprint $table) {
+            $table->id('user_id');
+            $table->string('username', 255);
+            $table->string('email', 255);
+            $table->string('password', 255);
+            $table->decimal('balance', 10, 2)->default(0.00);
+            $table->binary('profile_image')->nullable();
+            $table->timestamps(); // creates created_at and updated_at
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
@@ -37,13 +34,10 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
+        Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists('user'); // match the actual table name
     }
 };
