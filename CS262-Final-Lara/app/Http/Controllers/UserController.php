@@ -16,7 +16,7 @@ public function buyTicket(Request $request)
     $request->validate([
         'event_id' => 'required|exists:event,event_id',
         'quantity' => 'required|integer|min:1',
-    ]);
+    ]); 
 
     $user = Auth::user();
     $event = DB::table('event')->where('event_id', $request->event_id)->first();
