@@ -44,6 +44,7 @@ Route::prefix('organization')->group(function () {
         Route::post('/event-request', [OrganizationController::class, 'createEvent']);
         Route::post('/logout', [OrganizationAuthController::class, 'logout']);
         Route::post('/change-password', [OrganizationAuthController::class, 'changePassword']);
+        Route::get('/buyers', [OrganizationController::class, 'showBuyer']);
         Route::get('/profile', [OrganizationController::class, 'profile']);
     });
 });
