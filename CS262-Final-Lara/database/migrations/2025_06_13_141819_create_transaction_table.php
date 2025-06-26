@@ -15,6 +15,8 @@ return new class extends Migration
             $table->foreignId('org_id')->nullable()->constrained('organization', 'org_id');
             $table->foreignId('admin_id')->constrained('admin', 'admin_id');
             $table->timestamp('transaction_date')->useCurrent();
+            $table->timestamp('created_at');
+            $table->timestamp('updated_at');
         });
     }
 

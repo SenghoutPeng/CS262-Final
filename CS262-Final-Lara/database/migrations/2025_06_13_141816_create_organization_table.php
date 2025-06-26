@@ -17,8 +17,9 @@ return new class extends Migration
             $table->string('contact_phone', 255);
             $table->string('contact_email', 255);
             $table->decimal('balance', 10, 2)->default(0.00);
-            $table->timestamp('created_at');
+
             $table->string('org_type', 125);
+            $table->timestamp('created_at');
             $table->timestamp('updated_at');
         });
     }

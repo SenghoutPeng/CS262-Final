@@ -93,9 +93,9 @@ public function logout(Request $request)
     }
 
     activity()
-    ->causedBy($organization)
+    ->causedBy($user)
     ->withProperties([
-        'email' => $organization->email,
+        'email' => $user->email,
     ])
     ->log('organization logged out');
 
@@ -135,6 +135,6 @@ public function logout(Request $request)
         return response()->json(['message' => 'Password updated successfully'], 200);
     }
 
-   
+
 }
 

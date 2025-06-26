@@ -16,6 +16,8 @@ return new class extends Migration
             $table->timestamp('purchase_date');
             $table->decimal('total_price', 8, 2);
             $table->foreignId('user_id')->constrained('user', 'user_id');
+            $table->timestamp('created_at');
+            $table->timestamp('updated_at');
         });
     }
 

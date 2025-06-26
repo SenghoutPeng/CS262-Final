@@ -3,113 +3,140 @@
 namespace App\Http\Controllers;
 
 use App\Models\Payment;
+use App\Models\Transaction;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
 
-public function buyTicket(Request $request)
-{
-    $request->validate([
-        'event_id' => 'required|exists:event,event_id',
-        'quantity' => 'required|integer|min:1',
-    ]); 
+    public function buyTicket(Request $request)
+    {
+        $request->validate([
+            'event_id' => 'required|exists:event,event_id',
+            'quantity' => 'required|integer|min:1',
+        ]);
 
-    $user = Auth::user();
-    $event = DB::table('event')->where('event_id', $request->event_id)->first();
+        $user = Auth::user();
+        $event = DB::table('event')->where('event_id', $request->event_id)->first();
 
-    if (!$event) {
-        return response()->json(['error' => 'Event not found'], 404);
-    }
+        if (!$event) {
+            return response()->json(['error' => 'Event not found'], 404);
+        }
 
-    // Check if enough tickets available
-    if ($event->total_ticket < $request->quantity) {
-        return response()->json(['error' => 'Not enough tickets available'], 400);
-    }
+        if ($event->status == 'pending') {
+            return response()->json(['message' => 'Event has not been approved']);
+        }
 
-    // Calculate total price
-    $totalPrice = $event->ticket_price * $request->quantity;
+        if ($event->total_ticket < $request->quantity) {
+            return response()->json(['error' => 'Not enough tickets available'], 400);
+        }
 
-    // Check user balance
-    if ($user->balance < $totalPrice) {
-        return response()->json(['error' => 'Insufficient balance'], 400);
-    }
+        $totalPrice = $event->ticket_price * $request->quantity;
 
-    // Deduct balance
-    DB::table('user')->where('user_id', $user->user_id)->update([
-        'balance' => $user->balance - $totalPrice
-    ]);
+        if ($user->balance < $totalPrice) {
+            return response()->json(['error' => 'Insufficient balance'], 400);
+        }
 
-    // Create payment
-    $paymentId = DB::table('payment')->insertGetId([
-        'user_id' => $user->user_id,
-        'event_id' => $event->event_id,
-        'amount' => $totalPrice,
-        'quantity' => $request->quantity,
-        'payment_status' => 'Completed',
-        'payment_date' => now(),
-    ]);
+        // Deduct user balance
+        DB::table('user')->where('user_id', $user->user_id)->update([
+            'balance' => $user->balance - $totalPrice
+        ]);
 
-    $checkInCodes = [];
-
-    for ($i = 0; $i < $request->quantity; $i++) {
-
-        $code = Str::uuid();
-        $checkInCodes[] = $code;
-
-        DB::table('ticket')->insert([
+        // Create payment
+        $paymentId = DB::table('payment')->insertGetId([
             'user_id' => $user->user_id,
             'event_id' => $event->event_id,
+            'amount' => $totalPrice,
+            'quantity' => $request->quantity,
+            'payment_status' => 'Completed',
+            'payment_date' => now(),
+        ]);
+
+        // Create as many tickets as the quantity requested and insert them one by one to make sure the payment_id actually applied to each individual ticket
+        $checkInCodes = [];
+
+        for ($i = 0; $i < $request->quantity; $i++) {
+            $code = Str::uuid();
+            $checkInCodes[] = $code;
+
+            DB::table('ticket')->insert([
+                'user_id' => $user->user_id,
+                'event_id' => $event->event_id,
+                'payment_id' => $paymentId,
+                'purchase_date' => now(),
+                'ticket_code' => $code,
+                'total_price' => $event->ticket_price,
+            ]);
+        }
+
+        // Get org_id
+        $organizationRecord = DB::table('event')
+            ->join('organization', 'organization.org_id', '=', 'event.org_id')
+            ->where('event.event_id', $request->event_id)
+            ->select('organization.org_id')
+            ->first();
+
+        $organizationId = $organizationRecord->org_id;
+
+        // Calculate commission
+        $commissionAmount = $totalPrice * 0.05;
+
+        // Create transaction
+        Transaction::create([
+            'amount' => $totalPrice,
+            'user_id' => $user->user_id,
+            'org_id' => $organizationId,
+            'event_id' => $event->event_id,
             'payment_id' => $paymentId,
-            'purchase_date' => now(),
-            'ticket_code' => $code,
-            'total_price' => $event->ticket_price,
+            'commission_amount' => $commissionAmount
+        ]);
+
+        // Update organization balance
+        DB::table('organization')->where('org_id', $organizationId)->update([
+            'balance' => DB::raw("balance + " . ($totalPrice - $commissionAmount))
+        ]);
+
+        // Update event ticket count
+        DB::table('event')->where('event_id', $event->event_id)->update([
+            'total_ticket' => $event->total_ticket - $request->quantity
+        ]);
+
+        // Update admin balance
+        DB::table('admin')->where('admin_id', $event->admin_id)->update([
+            'balance' => DB::raw("balance + " . $commissionAmount)
+        ]);
+
+        return response()->json([
+            'message' => 'Ticket(s) purchased successfully',
+            'checkin_codes' => $checkInCodes
         ]);
     }
 
 
-    DB::table('event')->where('event_id', $event->event_id)->update([
-        'total_ticket' => $event->total_ticket - $request->quantity
-    ]);
-
-    return response()->json(['message' => 'Ticket(s) purchased successfully','checkin_codes'=>$checkInCodes]);
-}
-
-
     public function showRatingForm()
     {
-        $rating_category_db = DB::select('select
-        rating_category_name from rating_category
-        ');
-        return response()->json(['rating_category'=>$rating_category_db]);
+        $ratingCategory = DB::table('rating_category')->select('rating_category_name')->get();
+
+        return response()->json(['rating_category'=>$ratingCategory]);
     }
 
-    public function rating(Request $request)
-    {
 
-        $request->validate(
-            [
-                'rating_category_id' =>'required|exists:rating_category, rating_category_id'
-            ]
-        );
-
-        $rating_db = DB::select('select ',);
-    }
     public function profile()
     {
         // Get the currently logged-in user user
         $user = Auth::guard()->user();
 
-        // You want the user ID
-        $user_id = $user->user_id;
+        // Get the logged in user's id
+        $userId = $user->user_id;
 
-        $user_db = DB::select("SELECT * FROM user WHERE user_id = ?", [$user_id]);
+        // Get the logged in user's information
+        $userInfo = DB::table('user')->where('user_id', $userId)->get();
 
         return response()->json([
-            'user_information' => $user_db
+            'user_information' => $userInfo
         ]);
     }
 }

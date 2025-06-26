@@ -23,7 +23,7 @@ class PaymentController extends Controller
 
         $payment_id = DB::table('payment')->insertGetId([
             'user_id' => $ticket->user_id,
-            'ticket_id' => $ticket->ticket_id,
+            'ticket_id' => $request->ticket_id,
             'event_id' => $event->event_id,
             'amount' => $amount,
             'paid_at' => now(),
