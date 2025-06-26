@@ -1,6 +1,6 @@
 <template>
     <div class="navbar bg-base-100 shadow-sm">
-        <div class="felx-1">
+        <div class="flex-1">
             <a class="btn btn-ghost text-xl">Banana</a>
         </div>
 

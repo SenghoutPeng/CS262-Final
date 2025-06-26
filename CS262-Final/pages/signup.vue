@@ -30,8 +30,8 @@ const errors = ref({})
 const FormData = ref({
     email: '',
     username: '',
-    password_confirmation: '',
     password: '',
+    password_confirmation: '',
 })
 
 definePageMeta({
@@ -54,11 +54,10 @@ await client(`${config.public.baseUrl}/api/signup`, {
 
 
         await login(FormData.value)
+        navigateTo('/');
     }catch(err){
         errors.value = err.response._data.errors
     }
-
-
 
 }
 

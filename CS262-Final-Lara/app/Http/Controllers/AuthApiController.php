@@ -18,7 +18,7 @@ class AuthApiController extends Controller
     {
        $validated = $request->validate([
             'username' => 'required|string|max:255',
-            'email' => 'required|email|unique:user',
+            'email' => 'required|email|unique:user,email',
             'password' => 'required|min:8|confirmed',
         ]);
 
@@ -74,7 +74,6 @@ public function login(Request $request)
 }
 
 
-
 public function logout(Request $request)
 {
 
@@ -92,12 +91,12 @@ public function logout(Request $request)
         return response()->json(['message' => 'Logged out successfully']);
     }
 
-    activity()
+    /*activity()
     ->causedBy($organization)
     ->withProperties([
         'email' => $organization->email,
     ])
-    ->log('organization logged out');
+    ->log('organization logged out');*/
 
     return response()->json(['message' => 'No active token found'], 400);
 }

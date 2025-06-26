@@ -42,7 +42,7 @@ class AdminController extends Controller
         $userList = DB::table('user')->get();
 
         return response()->json([
-            'total_ussers' => $totalUsers,
+            'total_users' => $totalUsers,
             'new_users_this_month' => $newUsers,
             'total_balance' => $totalBalance,
             'users' => $userList
@@ -51,7 +51,8 @@ class AdminController extends Controller
 
     public function allEventRequest()
     {
-        $eventRequests = DB::table('event')->where('status', 'pending')->get();
+        $eventRequests = DB::table('event')->whereIn('status', ['pending', 'approved', 'rejected'])->join('organization','organization.org_id','=','event.org_id')->select('event.event_id','organization.org_name','event.title','event.created_at', 'event.status')->get();
+
 
         return response()->json([
             'event_requests' => $eventRequests
@@ -61,13 +62,12 @@ class AdminController extends Controller
     public function viewEventRequest(Request $request)
     {
         $event_id = $request->event_id;
-
-        $eventRequest = DB::table('event')->where('even_id', $event_id)->select('title','description','location','proposed_date');
-
+        $eventRequest = DB::table('event')->where('event_id', $event_id)->select('event_id','title','description','location','proposed_date')->first();
         return response()->json([
             'event_request_detail' => $eventRequest
         ]);
     }
+
     public function decisionOnEventRequest(Request $request)
     {
         $validated = $request->validate([
@@ -144,8 +144,7 @@ class AdminController extends Controller
                 [
                     'timestamp' => $log->created_at,
                     'description' => $log->description,
-                    'event' => $log->event,
-                    'causer_type' => $log->event,
+                    'activity' => $log->event,
                     'causer_name' => $name
                 ];
         }
@@ -169,4 +168,62 @@ class AdminController extends Controller
             'admin_information' => $admin_db
         ]);
     }
+
+
+    public function transaction(Request $request)
+{
+    $keyword = $request->keyword;
+    $filterBy30Days = $request->has('last_30_days');
+
+    // Summary counts
+    $totalEvents = DB::table('event')->count();
+    $totalOrganizations = DB::table('organization')->count();
+    $totalTicketSold = DB::table('ticket')->count();
+
+
+    $transactionQuery = DB::table('transaction')
+        ->join('organization', 'organization.org_id', '=', 'transaction.org_id')
+        ->join('event', 'event.event_id', '=', 'transaction.event_id')
+        ->join('payment', 'payment.payment_id', '=', 'transaction.payment_id')
+        ->select(
+            'transaction.created_at as date',
+            'organization.org_name as organization',
+            'event.title as event',
+            DB::raw('SUM(payment.quantity) as ticket_sold'),
+            'transaction.commission_amount as commission'
+        );
+
+    // Apply keyword filter if provided
+    if (!empty($keyword)) {
+        $transactionQuery->where(function ($q) use ($keyword) {
+            $q->where('organization.org_name', 'like', '%' . $keyword . '%')
+              ->orWhere('event.title', 'like', '%' . $keyword . '%');
+        });
+    }
+
+    // Apply last 30 days filter if requested
+    if ($filterBy30Days) {
+        $date30DaysAgo = now()->subDays(30);
+        $transactionQuery->where('transaction.created_at', '>=', $date30DaysAgo);
+    }
+
+    // Finalize query
+    $transactionList = $transactionQuery
+        ->groupBy(
+            'transaction.created_at',
+            'organization.org_name',
+            'event.title',
+            'transaction.commission_amount'
+        )
+        ->orderByDesc('transaction.created_at')
+        ->get();
+
+    // Response
+    return response()->json([
+        'total_event' => $totalEvents,
+        'total_organization' => $totalOrganizations,
+        'ticket_sold' => $totalTicketSold,
+        'transactions' => $transactionList
+    ]);
+}
 }

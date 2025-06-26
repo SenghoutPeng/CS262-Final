@@ -16,39 +16,11 @@
       <!-- Right-side: Avatar and Theme Toggle -->
       <div class="flex items-center gap-2">
         <div class="dropdown dropdown-end">
-          <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
-            <div class="w-10 rounded-full">
-              <img alt="User Avatar"
-                   src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
-            </div>
-          </div>
+          <button class="btn mt-2" @click="handleLogout">
+            <Icon name="log-out" />
+            Sign Out
+            </button>
 
-          <ul
-            tabindex="0"
-            class="menu menu-sm dropdown-content bg-base-200 rounded-box z-10 mt-3 w-52 p-2 shadow">
-            <li><a @click.prevent="handleLogout" class="text-white">Logout</a></li>
-            <li>
-
-              <label class="swap swap-rotate">
-                <input type="checkbox" class="theme-controller" value="dark" @change="toggleTheme" />
-
-                <!-- Sun icon -->
-                <svg class="swap-off h-6 w-6" xmlns="http://www.w3.org/2000/svg"
-                     viewBox="0 0 24 24" fill="white">
-                  <path
-                    d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41...Z" />
-                </svg>
-
-                <!-- Moon icon -->
-                <svg class="swap-on h-6 w-6" xmlns="http://www.w3.org/2000/svg"
-                     viewBox="0 0 24 24" fill="white">
-                  <path
-                    d="M21.64,13a1,1,0,0,0-1.05-.14...Z" />
-                </svg>
-              </label>
-              
-            </li>
-          </ul>
         </div>
       </div>
     </div>
@@ -62,26 +34,25 @@ const toggleSidebar = () => {
   emit('toggle-sidebar')
 }
 
-const { logout } = useSanctumAuth()
 const handleLogout = async () => {
-  await logout()
+  try {
+    // Get CSRF cookie
+    await $fetch(`${config.public.baseUrl}/sanctum/csrf-cookie`, {
+      credentials: 'include'
+    })
+
+    // Logout request
+    await $fetch(`${config.public.baseUrl}/api/logout`, {
+      method: 'POST',
+      credentials: 'include'
+    })
+
+    // Redirect to login page or clear user state
+    // Example: navigateTo('/login')
+  } catch (error) {
+    console.error('Logout failed:', error)
+  }
 }
 
-import { onMounted } from 'vue'
 
-const toggleTheme = (event) => {
-  const isDark = event.target.checked
-  const html = document.documentElement
-  const theme = isDark ? 'dark' : 'light'
-  html.setAttribute('data-theme', theme)
-  localStorage.setItem('theme', theme)
-}
-
-onMounted(() => {
-  const savedTheme = localStorage.getItem('theme') || 'light'
-  document.documentElement.setAttribute('data-theme', savedTheme)
-
-  const checkbox = document.querySelector('.theme-controller')
-  if (checkbox) checkbox.checked = savedTheme === 'dark'
-})
 </script>

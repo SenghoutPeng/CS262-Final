@@ -20,6 +20,10 @@ Route::put('/users/{id}', function (Request $request, $id) {
     return response()->json(['message' => 'User updated successfully']);
 });
 
+Route::get('/user', function (Request $request) {
+    return $request->user();
+})->middleware('auth:sanctum');
+
 // User routes
 Route::prefix('/')->group(function () {
     Route::post('/signup', [AuthApiController::class, 'signup']);
@@ -30,7 +34,6 @@ Route::prefix('/')->group(function () {
         Route::post('/change-password', [AuthApiController::class, 'changePassword']);
         Route::post('/logout', [AuthApiController::class, 'logout']);
         Route::get('/profile', [UserController::class, 'userProfile']);
-
     });
 });
 
@@ -56,17 +59,26 @@ Route::prefix('admin')->group(function () {
 
     Route::middleware('auth:admin-api')->group(function () {
 
-        Route::post('/decision', [AdminController::class, 'decisionOnEventRequest']);
+        
         Route::post('/logout', [AdminAuthController::class, 'logout']);
-        Route::post('/detail-event-request/{event_id}', [AdminController::class, 'allOrganization']);
+        
         Route::post('/change-password', [AdminAuthController::class, 'changePassword']);
         Route::get('/profile', [AdminController::class, 'adminProfile']);
-        Route::get('/users', [AdminController::class, 'allUser']);
-        Route::get('/organizations', [AdminController::class, 'allOrganization']);
-        Route::get('/event-requests', [AdminController::class, 'allOrganization']);
+        //Route::get('/users', [AdminController::class, 'allUser']);
+        //Route::get('/organizations', [AdminController::class, 'allOrganization']);
+        //Route::get('/event-requests', [AdminController::class, 'allOrganization']);
 
 
-        Route::get('/activity-log', [AdminController::class, 'showActivity']);
-        Route::get('/dashboard', [AdminController::class, 'dashboard']);
+        
+        
     });
+    Route::get('/transaction', [AdminController::class, 'transaction']);
+    Route::get('/dashboard', [AdminController::class, 'dashboard']);
+    Route::post('/decision', [AdminController::class, 'decisionOnEventRequest']);
+    Route::get('/detail-event-request/{event_id}', [AdminController::class, 'viewEventRequest']);
+    Route::get('/activity-log', [AdminController::class, 'showActivity']);
+    Route::get('/users', [AdminController::class, 'allUser']);
+    Route::get('/organizations', [AdminController::class, 'allOrganization']);
+    //Route::get('/event-requests', [AdminController::class, 'allOrganization']);
+    Route::get('/all-event-requests', [AdminController::class, 'allEventRequest']);
 });

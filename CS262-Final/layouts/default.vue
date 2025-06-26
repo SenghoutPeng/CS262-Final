@@ -1,7 +1,7 @@
 <template>
 
   <div class="navbar bg-base-100 shadow-sm">
-        <div class="felx-1">
+        <div class="flex-1">
             <a class="btn btn-ghost text-xl">Banana</a>
         </div>
 
@@ -23,9 +23,16 @@
 
 <script setup>
     const  {logout} = useSanctumAuth()
+    const config = useRuntimeConfig()
+
+
 const handleLogout = async () => {
+    await $fetch(`${config.public.baseUrl}/sanctum/csrf-cookie`, {
+      credentials: 'include'
+    })
+  
     await logout()
-}
+  }
 
 </script>
 

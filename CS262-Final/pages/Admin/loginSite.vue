@@ -2,7 +2,7 @@
     <div>
         <form @submit.prevent="handleLogin">
             <h1>Login page</h1>
-            <input type="text" v-model="FormData.username" placeholder="username"/>
+            <input type="text" v-model="FormData.email" placeholder="email"/>
             <input type="text" v-model="FormData.password" placeholder="password"/>
             <input type="hidden" name="_token" value="jdhehg34gh##$$%mfu4n" />
             <button type="submit" class="btn btn-primary w-full">Login</button>
@@ -12,7 +12,7 @@
 
 <script setup>
     const FormData = ref({
-        username: '',
+        email: '',
         password: ''
     })
 
@@ -23,20 +23,28 @@ definePageMeta({
 
 const handleLogin = async () => {
   try {
+    // First get CSRF cookie
+    await $fetch('http://localhost:8000/sanctum/csrf-cookie', {
+      credentials: 'include', // Important to send cookies
+    });
+
+    // Now send login request with credentials included
     const response = await $fetch('http://localhost:8000/api/admin/login', {
       method: 'POST',
-      body: FormData.value
-    })
+      body: FormData.value,
+      credentials: 'include', // important to send cookies
+    });
 
-    // Save token manually
-    localStorage.setItem('admin_token', response.token)
+    // Save token manually if your backend returns one
+    localStorage.setItem('admin_token', response.token);
 
-    console.log('Admin logged in:', response.admin)
-    // Redirect to admin dashboard
+    console.log('Admin logged in:', response.admin);
+    navigateTo('/Admin/allusers');
   } catch (err) {
-    console.error('Login failed:', err?.data?.message || err.message)
+    console.error('Login failed:', err?.data?.message || err.message);
   }
-}
+};
+
 </script>
 
 <style scoped>
